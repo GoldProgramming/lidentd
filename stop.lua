@@ -1,0 +1,8 @@
+assert( (pcall( require, "posix" )), "Unable to locate posix library" )
+local f = io.open( ".lockfile" )
+assert( f, "Unable to open lockfile - are you not running as a background process?" )
+local id = tonumber( f:read() )
+assert( id, "Improper lockfile format, aborting" )
+print( id )
+assert( require( "posix" ).kill( id, require( "posix" ).SIGTERM ) )
+print( "Sent kill signal" )

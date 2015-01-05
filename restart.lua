@@ -1,0 +1,7 @@
+assert( (pcall( require, "posix" )), "Unable to locate posix library" )
+local f = io.open( ".lockfile" )
+assert( f, "Unable to open lockfile - are you not running as a daemon?" )
+local id = tonumber( f:read() )
+assert( id, "Improper lockfile format, aborting" )
+require( "posix" ).kill( id, require( "posix" ).SIGUSR1 )
+print( "Sent restart signal" )
