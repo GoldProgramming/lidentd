@@ -1,10 +1,10 @@
 settings = ...
-assert( ( settings.bindhost and settings.port ), "Missing settings - run 'start.lua makeconf'" )
+assert( ( settings.bindhost and settings.port and settings.path ), "Missing settings - run 'start.lua makeconf'" )
 socket = require( "socket" )
 server = socket.bind( settings.bindhost, settings.port ) -- should be tonumber()ed
 while true do
 	local cli = server:accept()
-	local f = io.open( ".ident" )
+	local f = io.open( settings.path .. ".ident" )
 	local ident = f:read() or "lidentd"
 	pcall( f.close, f )
 	local l = cli:receive()

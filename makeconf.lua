@@ -6,6 +6,13 @@ if x and x ~= "" then
 else
 	settings.bindhost = "*"
 end
+io.stdout:write( "Directory:" )
+local x = io.stdin:read()
+if x and x ~= "" then
+	settings.path = x:match( "(.-)/?$" ) .. "/"
+else
+	settings.path = "./"
+end
 io.stdout:write( "Port (default '113'): " )
 local x = io.stdin:read()
 if x and x ~= "" then

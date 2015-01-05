@@ -1,10 +1,9 @@
 posix = require( "posix" )
 settings = ...
-local path = posix.getcwd():match( "^(.-)/?$" ) .. "/"
-assert( ( settings.bindhost and settings.port ), "Missing settings - run 'start.lua makeconf'" )
+assert( ( settings.bindhost and settings.port and settings.path ), "Missing settings - run 'start.lua makeconf'" )
 local pid = posix.fork()
 if pid ~= 0 then -- parent gets child PID
-	local f = io.open( ".lockfile", "w" )
+	local f = io.open( settings.path .. ".lockfile", "w" )
 	if f then
 		f:write( tostring( pid ) .. "\r\n" )
 		pcall( f.close, f )
@@ -28,7 +27,7 @@ server:settimeout( 0.1 )
 while true do
 	local cli = server:accept()
 	if cli then
-		local f = io.open( path .. ".ident" )
+		local f = io.open( settings.path .. ".ident" )
 		local ident = f:read() or "lidentd"
 		pcall( f.close, f )
 		local l = cli:receive()
