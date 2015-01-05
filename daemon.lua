@@ -16,7 +16,6 @@ end
 socket = require( "socket" )
 server = socket.bind( settings.bindhost, settings.port ) -- should be tonumber()ed
 posix.signal( posix.SIGTERM, function()
-	print( "Stopping" )
 	pcall( server.close, server )
 	os.remove( path .. ".lockfile" )
 	os.exit()
