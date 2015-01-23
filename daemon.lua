@@ -12,11 +12,15 @@ if pid ~= 0 then -- parent gets child PID
 	end
 	os.exit()
 end
+local t, err = io.open( settings.path .. ".ident" )
+assert( t, err )
+pcall( t.close, t )
 socket = require( "socket" )
-server = socket.bind( settings.bindhost, settings.port ) -- should be tonumber()ed
+server, err = socket.bind( settings.bindhost, settings.port ) -- should be tonumber()ed
+assert( server, err )
 posix.signal( posix.SIGTERM, function()
 	pcall( server.close, server )
-	os.remove( path .. ".lockfile" )
+	os.remove( settings.path .. ".lockfile" )
 	os.exit()
 end)
 posix.signal( posix.SIGUSR1, function()
@@ -27,12 +31,12 @@ server:settimeout( 0.1 )
 while true do
 	local cli = server:accept()
 	if cli then
-		local f = io.open( settings.path .. ".ident" )
+		local f, err = io.open( settings.path .. ".ident" )
 		local ident = f:read() or "lidentd"
 		pcall( f.close, f )
 		local l = cli:receive()
 		if l then
-			cli:send( l:gsub( " ", "" ) .. ":USERID:Lua5.2:" .. ident .. "\r\n" )
+			cli:send( l:gsub( " ", "" ) .. ":USERID:" .. _VERSION .. ":" .. ident .. "\r\n" )
 		end
 		pcall( cli.close, cli )
 	end
