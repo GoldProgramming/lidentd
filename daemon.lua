@@ -16,8 +16,10 @@ local t, err = io.open( settings.path .. ".ident" )
 assert( t, err )
 pcall( t.close, t )
 socket = require( "socket" )
-server, err = socket.bind( settings.bindhost, settings.port ) -- should be tonumber()ed
-assert( server, err )
+local servs = []
+for serv in settings.bindhost:gmatch( "[^;]+" ) do
+	table.insert( servs, socket.bind( serv, settings.port ) )
+end
 posix.signal( posix.SIGTERM, function()
 	pcall( server.close, server )
 	os.remove( settings.path .. ".lockfile" )
@@ -29,15 +31,17 @@ posix.signal( posix.SIGUSR1, function()
 end)
 server:settimeout( 0.1 )
 while true do
-	local cli = server:accept()
-	if cli then
-		local f, err = io.open( settings.path .. ".ident" )
-		local ident = f:read() or "lidentd"
-		pcall( f.close, f )
-		local l = cli:receive()
-		if l then
-			cli:send( l:gsub( " ", "" ) .. ":USERID:" .. _VERSION .. ":" .. ident .. "\r\n" )
+	for k, server in pairs( serv ) do
+		local cli = server:accept()
+		if cli then
+			local f, err = io.open( settings.path .. ".ident" )
+			local ident = f:read() or "lidentd"
+			pcall( f.close, f )
+			local l = cli:receive()
+			if l then
+				cli:send( l:gsub( " ", "" ) .. ":USERID:" .. _VERSION .. ":" .. ident .. "\r\n" )
+			end
+			pcall( cli.close, cli )
 		end
-		pcall( cli.close, cli )
 	end
 end
