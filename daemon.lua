@@ -16,7 +16,7 @@ local t, err = io.open( settings.path .. ".ident" )
 assert( t, err )
 pcall( t.close, t )
 socket = require( "socket" )
-local servs = []
+local servs = {}
 for serv in settings.bindhost:gmatch( "[^;]+" ) do
 	table.insert( servs, socket.bind( serv, settings.port ) )
 end
